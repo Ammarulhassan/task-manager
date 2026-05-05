@@ -16,12 +16,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'User already exists' }, { status: 400 });
 
     const user = await User.create({ name, email, password });
-    const token = signToken(user._id.toString());
+    const token = await signToken(user._id.toString());
 
     const res = NextResponse.json({ message: 'Registered successfully' }, { status: 201 });
     res.cookies.set('token', token, { httpOnly: true, maxAge: 60 * 60 * 24 * 7 });
     return res;
-  } catch {
-    return NextResponse.json({ message: 'Server error' }, { status: 500 });
+  } catch (err) {
+    console.error('[REGISTER ERROR]', err);
+    return NextResponse.json({ message: 'Server error', detail: String(err) }, { status: 500 });
   }
 }
